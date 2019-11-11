@@ -39,3 +39,8 @@ var.test(filter(dados, East == 1)$Service, filter(dados, East == 0)$Service) # I
 
 # TESTES DE COMPARAÇÕES DE MÉDIAS
 t.test()
+
+t.test(filter(dados, East == 1)$Price, filter(dados, East == 0)$Price) #dif medias !=0 (Rejeita H0)
+t.test(filter(dados, East == 1)$Food, filter(dados, East == 0)$Food) #dif medias != 0 (Rejeita H0)
+t.test(filter(dados, East == 1)$Decor, filter(dados, East == 0)$Decor)#dif medias = 0 (Não Rejeita H0)
+t.test(filter(dados, East == 1)$Service, filter(dados, East == 0)$Service)#dif medias != 0 (Rejeita H0)
