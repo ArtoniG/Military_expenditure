@@ -2,6 +2,7 @@ library(readr)
 library(GGally)
 library(ggpubr)
 library(tidyverse)
+library(nortest)
 source("~/Public/trabaioME613/norm_diag.R")
 source("~/Public/trabaioME613/model_measures.R")
 source("~/Public/trabaioME613/estimate_table.R")
@@ -13,6 +14,13 @@ attach(dados)
 # MEDIDAS RESUMO DOS DADOS
 summary(dados)
 apply(dados[,3:6], 2, sd)
+Regions <- c()
+Regions[East == 1] <- "Leste"
+Regions[East == 0] <- "Oeste"
+ggboxplot(cbind(dados, Regions), x = "Regions", y = "Price", color = "Regions", palette = c("#00AFBB", "#E7B800"))
+ggboxplot(cbind(dados, Regions), x = "Regions", y = "Food", color = "Regions", palette = c("#00AFBB", "#E7B800"))
+ggboxplot(cbind(dados, Regions), x = "Regions", y = "Decor", color = "Regions", palette = c("#00AFBB", "#E7B800"))
+ggboxplot(cbind(dados, Regions), x = "Regions", y = "Service", color = "Regions", palette = c("#00AFBB", "#E7B800"))
 
 # MEDIDAS RESUMOS SEPARADAS POR REGIÕES DA CIDADE
 by(dados, East, summary)
