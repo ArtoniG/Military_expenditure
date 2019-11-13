@@ -14,6 +14,7 @@ attach(dados)
 # MEDIDAS RESUMO DOS DADOS
 summary(dados)
 apply(dados[,3:6], 2, sd)
+combn(c(3,4,5,6), 2, function(i) cor(dados[,i[1]], dados[,i[2]], method = "kendall"), simplify = TRUE)
 Regions <- c()
 Regions[East == 1] <- "Leste"
 Regions[East == 0] <- "Oeste"
