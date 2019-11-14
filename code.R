@@ -25,10 +25,13 @@ ggboxplot(cbind(dados, Regions), x = "Regions", y = "Service", color = "Regions"
 
 # MEDIDAS RESUMOS SEPARADAS POR REGIÕES DA CIDADE
 by(dados, East, summary)
-by(dados[,3:7], East, sd)
+apply(filter(dados[,3:6], East == 1), 2, sd)
+apply(filter(dados[,3:6], East == 0), 2, sd)
 
 # GRÁFICOS DAS DISTRIBUIÇÕES AMOSTRAIS E CORRELAÇÕES
 ggpairs(dados[,3:6])
+ggpairs(filter(dados[,3:6], East == 1))
+ggpairs(filter(dados[,3:6], East == 0))
 
 # TESTES DE NORMALIDADE SHAPIRO-WILK 
 shapiro.test(filter(dados, East == 1)$Price) # Normal
@@ -47,7 +50,6 @@ var.test(filter(dados, East == 1)$Decor, filter(dados, East == 0)$Decor) # Difer
 var.test(filter(dados, East == 1)$Service, filter(dados, East == 0)$Service) # Igual
 
 # TESTES DE COMPARAÇÕES DE MÉDIAS
-t.test()
 
 t.test(filter(dados, East == 1)$Price, filter(dados, East == 0)$Price) #dif medias !=0 (Rejeita H0)
 t.test(filter(dados, East == 1)$Food, filter(dados, East == 0)$Food) #dif medias != 0 (Rejeita H0)
