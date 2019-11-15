@@ -7,7 +7,7 @@ library(nortest)
 source("~/Public/trabaioME613/norm_diag.R")
 source("~/Public/trabaioME613/model_measures.R")
 source("~/Public/trabaioME613/estimate_table.R")
-source("~/Public/trabaioME613/envel_norm.R")
+source("~/Public/trabaioME613/cook_hat.R")
 
 dados <- read_csv("~/Downloads/Books/data/a_modern_approach_to_regression_with_r/nyc.csv", col_names = TRUE)
 attach(dados)
@@ -58,9 +58,48 @@ t.test(filter(dados, East == 1)$Food, filter(dados, East == 0)$Food) #dif medias
 t.test(filter(dados, East == 1)$Decor, filter(dados, East == 0)$Decor)#dif medias = 0 (Não Rejeita H0)
 t.test(filter(dados, East == 1)$Service, filter(dados, East == 0)$Service)#dif medias != 0 (Rejeita H0)
 
-# AJUSTE DE MODELO NORMAL, INDEPENDENTE E HOMOCEDÁSTICO
-model <- lm(Price ~ Food + Service + Decor + East, dados)
+# AJUSTE DE MODELO NORMAL, INDEPENDENTE E HOMOCEDÁSTICO COM AS VARIÁVEIS CENTRALIZADAS NA MÉDIA
+dados <- cbind(dados, Food.c = dados$Food - mean(dados$Food),
+                Service.c = dados$Service - mean(dados$Service),
+                Decor.c = dados$Decor - mean(dados$Decor))
+model <- lm(Price ~ Food.c + Service.c + Decor.c + East, dados)
 summary(model)
 
+estimate_tibble(model)
 normal_diag(model)
-envelnorm(model)
+cook_hat(model)
+
+# AJUSTE DE MODELO SEM A VARIÁVEL SERVICE
+model.red <- lm(Price ~ Food.c + Decor.c + East, dados)
+summary(model.red)
+
+estimate_tibble(model.red)
+normal_diag(model.red)
+cook_hat(model.red)
+
+dados <- dados[-c(56, 30, 109, 141, 83, 130, 165, 103, 48),]
+
+# REPETINDO OS AJUSTES, SÓ QUE DESSA VEZ SEM OS VALORES INFLUENTES
+# MODELO COMPLETO
+model <- lm(Price ~ Food.c + Service.c + Decor.c + East, dados)
+summary(model)
+
+estimate_tibble(model)
+normal_diag(model)
+cook_hat(model)
+
+# MODELO SEM A VARIÁVEL SERVICE
+model.red <- lm(Price ~ Food.c + Decor.c + East, dados)
+summary(model.red)
+
+estimate_tibble(model.red)
+normal_diag(model.red)
+cook_hat(model.red)
+
+# AJUSTE DE MODELO SEM A VARIÁVEL EAST
+model.red <- lm(Price ~ Food.c + Decor.c, dados)
+summary(model.red)
+
+estimate_tibble(model.red)
+normal_diag(model.red)
+cook_hat(model.red)
