@@ -1,3 +1,4 @@
+#https://pt.overleaf.com/project/5dcdb71eb9d4d8000112bf57
 library(readr)
 library(GGally)
 library(ggpubr)
@@ -14,7 +15,8 @@ attach(dados)
 # MEDIDAS RESUMO DOS DADOS
 summary(dados)
 apply(dados[,3:6], 2, sd)
-combn(c(3,4,5,6), 2, function(i) cor(dados[,i[1]], dados[,i[2]], method = "kendall"), simplify = TRUE)
+combn(c(3,4,5,6), 2, function(i) cor(dados[,i[1]], dados[,i[2]], method = "spearman"), simplify = TRUE)
+
 Regions <- c()
 Regions[East == 1] <- "Leste"
 Regions[East == 0] <- "Oeste"
@@ -55,3 +57,10 @@ t.test(filter(dados, East == 1)$Price, filter(dados, East == 0)$Price) #dif medi
 t.test(filter(dados, East == 1)$Food, filter(dados, East == 0)$Food) #dif medias != 0 (Rejeita H0)
 t.test(filter(dados, East == 1)$Decor, filter(dados, East == 0)$Decor)#dif medias = 0 (Não Rejeita H0)
 t.test(filter(dados, East == 1)$Service, filter(dados, East == 0)$Service)#dif medias != 0 (Rejeita H0)
+
+# AJUSTE DE MODELO NORMAL, INDEPENDENTE E HOMOCEDÁSTICO
+model <- lm(Price ~ Food + Service + Decor + East, dados)
+summary(model)
+
+normal_diag(model)
+envelnorm(model)
