@@ -4,6 +4,9 @@ library(GGally)
 library(ggpubr)
 library(tidyverse)
 library(nortest)
+library(car)
+library(MASS)
+library(gvlma)
 source("~/Public/trabaioME613/norm_diag.R")
 source("~/Public/trabaioME613/model_measures.R")
 source("~/Public/trabaioME613/estimate_table.R")
@@ -35,22 +38,6 @@ ggpairs(dados[,3:6])
 ggpairs(filter(dados[,3:6], East == 1))
 ggpairs(filter(dados[,3:6], East == 0))
 
-# TESTES DE NORMALIDADE SHAPIRO-WILK 
-shapiro.test(filter(dados, East == 1)$Price) # Normal
-shapiro.test(filter(dados, East == 1)$Food) # Anormal
-shapiro.test(filter(dados, East == 1)$Decor) # Anormal
-shapiro.test(filter(dados, East == 1)$Service) # Anormal
-shapiro.test(filter(dados, East == 0)$Price) # Normal
-shapiro.test(filter(dados, East == 0)$Food) # Normal
-shapiro.test(filter(dados, East == 0)$Decor) # Anormal
-shapiro.test(filter(dados, East == 0)$Service) # Normal
-
-# TESTE DE HOMOCEDÁSTICIDADE
-var.test(filter(dados, East == 1)$Price, filter(dados, East == 0)$Price) # Igual
-var.test(filter(dados, East == 1)$Food, filter(dados, East == 0)$Food) # Igual
-var.test(filter(dados, East == 1)$Decor, filter(dados, East == 0)$Decor) # Diferente
-var.test(filter(dados, East == 1)$Service, filter(dados, East == 0)$Service) # Igual
-
 # TESTES DE COMPARAÇÕES DE MÉDIAS
 
 t.test(filter(dados, East == 1)$Price, filter(dados, East == 0)$Price) #dif medias !=0 (Rejeita H0)
@@ -62,6 +49,7 @@ t.test(filter(dados, East == 1)$Service, filter(dados, East == 0)$Service)#dif m
 dados <- cbind(dados, Food.c = dados$Food - mean(dados$Food),
                 Service.c = dados$Service - mean(dados$Service),
                 Decor.c = dados$Decor - mean(dados$Decor))
+
 model <- lm(Price ~ Food.c + Service.c + Decor.c + East, dados)
 summary(model)
 
@@ -77,9 +65,9 @@ estimate_tibble(model.red)
 normal_diag(model.red)
 cook_hat(model.red)
 
-dados <- dados[-c(56, 30, 109, 141, 83, 130, 165, 103, 48),]
+dados <- dados[-c(56, 30, 117, 130, 152, 168, 97, 7),] # identificados pelas funções
 
-# REPETINDO OS AJUSTES, SÓ QUE DESSA VEZ SEM OS VALORES INFLUENTES
+# REPETINDO OS AJUSTES, SÓ QUE DESSA VEZ SEM OS VALORES INFLUENTES, OUTLIERS, ETC
 # MODELO COMPLETO
 model <- lm(Price ~ Food.c + Service.c + Decor.c + East, dados)
 summary(model)
@@ -96,10 +84,53 @@ estimate_tibble(model.red)
 normal_diag(model.red)
 cook_hat(model.red)
 
-# AJUSTE DE MODELO SEM A VARIÁVEL EAST
-model.red <- lm(Price ~ Food.c + Decor.c, dados)
-summary(model.red)
+# AJUSTE DE MODELO COM INTERAÇÃO COM A VARIÁVEL EAST
+model.int <- lm(Price ~ Food.c + Decor.c + Service.c + East + Food.c:East + Decor.c:East + Service.c:East, dados)
+summary(model.int)
 
-estimate_tibble(model.red)
-normal_diag(model.red)
-cook_hat(model.red)
+estimate_tibble(model.int)
+normal_diag(model.int)
+cook_hat(model.int)
+
+# TESTA SE OS EFEITOS DAS VARIÁVEIS EXPLICATIVAS DEPENDEM
+# DA VARIÁVEL DUMMY
+
+anova(model.red, model.int)
+
+##################################################################################
+# FUNÇÕES PARA ANÁLISE DOS RESÍDUOS
+# PRECISA DOS PACOTES car, MASS e gvlma
+
+# outliers
+outlierTest(model)
+qqPlot(model, main = "QQ Plot")
+leveragePlots(model)
+
+# observações influentes
+avPlots(model)
+cutoff <- 4/(nrow(dados)-length(model$coefficients)-2)
+plot(model, which = 4, cook.levels = cutoff)
+influencePlot(model, id = "identify", main = "Influence plot", sub = "Tamanho dos círculos são proporcionais à distância de Cook")
+
+# não normalidade
+qqPlot(model, main = "QQ Plot")
+stud.res <- studres(model)
+hist(stud.res, freq = FALSE, main = "Distribution of Studentized Residuals")
+xfit <- seq(min(stud.res), max(stud.res), length.out = 40)
+yfit <- dnorm(xfit)
+lines(xfit,yfit)
+
+# heterocedásticidade
+ncvTest(model)
+spreadLevelPlot(model)
+
+# multicolinearidade
+crPlots(model)
+ceresPlots(model)
+
+# dependencia dos erros
+durbinWatsonTest(model)
+
+# ajuda adicional no diagnóstico
+gvmodel <- gvlma(model)
+summary(gvmodel)
