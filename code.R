@@ -1,4 +1,3 @@
-#https://pt.overleaf.com/project/5dcdb71eb9d4d8000112bf57
 library(readr)
 library(GGally)
 library(ggpubr)
@@ -7,6 +6,7 @@ library(nortest)
 library(car)
 library(MASS)
 library(gvlma)
+library(xtable)
 source("~/Public/trabaioME613/norm_diag.R")
 source("~/Public/trabaioME613/model_measures.R")
 source("~/Public/trabaioME613/estimate_table.R")
@@ -17,6 +17,7 @@ attach(dados)
 
 # MEDIDAS RESUMO DOS DADOS
 summary(dados)
+xtable(t(summary(dados[,4:ncol(dados)-1])), auto = TRUE, caption = "Medidas resumo dos dados sem distinção por região.", label = "resum_measure")
 apply(dados[,3:6], 2, sd)
 combn(c(3,4,5,6), 2, function(i) cor(dados[,i[1]], dados[,i[2]], method = "spearman"), simplify = TRUE)
 
@@ -30,6 +31,8 @@ ggboxplot(cbind(dados, Regions), x = "Regions", y = "Service", color = "Regions"
 
 # MEDIDAS RESUMOS SEPARADAS POR REGIÕES DA CIDADE
 by(dados, East, summary)
+xtable(t(summary(filter(dados[,3:6], East == 1))), auto = TRUE, caption = "Medidas resumo dos dados da região Leste", label = "resum_measure_region_east")
+xtable(t(summary(filter(dados[,3:6], East == 0))), auto = TRUE, caption = "Medidas resumo dos dados da região Oeste", label = "resum_measure_region_west")
 apply(filter(dados[,3:6], East == 1), 2, sd)
 apply(filter(dados[,3:6], East == 0), 2, sd)
 
