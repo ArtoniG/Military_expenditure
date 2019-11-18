@@ -21,13 +21,32 @@ xtable(t(summary(dados[,4:ncol(dados)-1])), auto = TRUE, caption = "Medidas resu
 apply(dados[,3:6], 2, sd)
 combn(c(3,4,5,6), 2, function(i) cor(dados[,i[1]], dados[,i[2]], method = "spearman"), simplify = TRUE)
 
-Regions <- c()
-Regions[East == 1] <- "Leste"
-Regions[East == 0] <- "Oeste"
-ggboxplot(cbind(dados, Regions), x = "Regions", y = "Price", color = "Regions", palette = c("#00AFBB", "#E7B800"))
-ggboxplot(cbind(dados, Regions), x = "Regions", y = "Food", color = "Regions", palette = c("#00AFBB", "#E7B800"))
-ggboxplot(cbind(dados, Regions), x = "Regions", y = "Decor", color = "Regions", palette = c("#00AFBB", "#E7B800"))
-ggboxplot(cbind(dados, Regions), x = "Regions", y = "Service", color = "Regions", palette = c("#00AFBB", "#E7B800"))
+Regiões <- c()
+Regiões[East == 1] <- "Leste"
+Regiões[East == 0] <- "Oeste"
+bp.price <- ggboxplot(cbind(dados, Regiões), x = "Regiões", y = "Price", 
+          color = "Regiões", palette = c("#00AFBB", "#E7B800"), ylab = "Preço", size = 2)
+ggpar(bp.price,
+      legend = "top", legend.title = "Boxplot da variável Preço separado por regiões:",
+      font.legend = c(28, "bold", "black"))
+
+bp.food <- ggboxplot(cbind(dados, Regiões), x = "Regiões", y = "Food", 
+          color = "Regiões", palette = c("#00AFBB", "#E7B800"), ylab = "Comida", size = 2)
+ggpar(bp.food,
+      legend = "top", legend.title = "Boxplot da variável Comida separado por regiões:",
+      font.legend = c(28, "bold", "black"))
+
+bp.decor <- ggboxplot(cbind(dados, Regiões), x = "Regiões", y = "Decor", 
+          color = "Regiões", palette = c("#00AFBB", "#E7B800"), ylab = "Decoração", size = 2)
+ggpar(bp.decor,
+      legend = "top", legend.title = "Boxplot da variável Decoração separado por regiões:",
+      font.legend = c(28, "bold", "black"))
+
+bp.service <- ggboxplot(cbind(dados, Regiões), x = "Regiões", y = "Service", 
+          color = "Regiões", palette = c("#00AFBB", "#E7B800"), ylab = "Serviço", size = 2)
+ggpar(bp.service,
+      legend = "top", legend.title = "Boxplot da variável Serviço separado por regiões:",
+      font.legend = c(28, "bold", "black"))
 
 # MEDIDAS RESUMOS SEPARADAS POR REGIÕES DA CIDADE
 by(dados, East, summary)
@@ -37,9 +56,18 @@ apply(filter(dados[,3:6], East == 1), 2, sd)
 apply(filter(dados[,3:6], East == 0), 2, sd)
 
 # GRÁFICOS DAS DISTRIBUIÇÕES AMOSTRAIS E CORRELAÇÕES
-ggpairs(dados[,3:6])
-ggpairs(filter(dados[,3:6], East == 1))
-ggpairs(filter(dados[,3:6], East == 0))
+ggpairs(dados[,3:6], 
+        upper = list(continuous = wrap('cor', method = "spearman")),
+        title = "Distribuições Amostrais, Correlações de Spearman e Gráficos de Dispersão das variáveis Preço, Comida, Decoração e Serviço sem distinção de região.")
+
+ggpairs(filter(dados[,3:6], East == 1), 
+        upper = list(continuous = wrap('cor', method = "spearman")),
+        title = "Distribuições Amostrais, Correlações de Spearman e Gráficos de Dispersão das variáveis Preço, Comida, Decoração e Serviço da região Leste")
+
+
+ggpairs(filter(dados[,3:6], East == 0), 
+        upper = list(continuous = wrap('cor', method = "spearman")),
+        title = "Distribuições Amostrais, Correlações de Spearman e Gráficos de Dispersão das variáveis Preço, Comida, Decoração e Serviço da região Oeste")
 
 # TESTES DE COMPARAÇÕES DE MÉDIAS
 
